@@ -25,12 +25,16 @@ const allowedRoutes: Record<AppRole, string[]> = {
 export default function AuthGate({ children }: Readonly<{ children: React.ReactNode }>) {
   const pathname = usePathname();
   const router = useRouter();
-  const [state, setState] = useState<GateState>(supabaseConfigured ? "checking" : "ready");
+  const [state, setState] = useState<GateState>("checking");
   const [access, setAccess] = useState<{ role: AppRole; userId: string } | null>(null);
 
   useEffect(() => {
     if (!supabaseConfigured) {
-      setState("ready");
+      if (pathname === "/login") setState("ready");
+      else {
+        const next = `${window.location.pathname}${window.location.search}`;
+        router.replace(`/login?next=${encodeURIComponent(next)}`);
+      }
       return;
     }
 
